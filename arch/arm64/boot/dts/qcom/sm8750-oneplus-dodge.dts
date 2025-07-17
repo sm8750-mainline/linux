@@ -50,6 +50,13 @@
 			format = "a8r8g8b8";
 		};
 	};
+	
+	pmic-glink {
+		compatible = "qcom,sm8750-pmic-glink", "qcom,pmic-glink";
+		#address-cells = <1>;
+		#size-cells = <0>;
+	//	orientation-gpios = <&tlmm 11 GPIO_ACTIVE_HIGH>;
+	};
 
 	clocks {
 		xo_board: xo-board {
@@ -868,23 +875,44 @@
 	status = "okay";
 };
 
-&remoteproc_adsp {
-	firmware-name = "qcom/sm8750/adsp.mbn",
-			"qcom/sm8750/adsp_dtb.mbn";
+&spi4 {
+	status = "okay";
+	synaptics_tcm_hbp@0 {
+		compatible = "synaptics,tcm-spi-hbp";
+		reg = <0>;
+		spi-max-frequency = <19000000>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <162 0x2008>;
+		vdd-supply = <&vreg_l4b_1p8>;
+		synaptics,irq-gpio = <&tlmm 162 0x2008>;
+		synaptics,reset-gpio = <&tlmm 161 GPIO_ACTIVE_LOW>;
+		synaptics,avdd-gpio = <&pm8550vs_j_gpios 3 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "ts_spi_active", "ts_spi_suspend";
+		pinctrl-0 = <&ts_int_active &ts_reset_active>;
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+		touchpanel,panel-coords = <20224 44480>;
+		touchpanel,tx-rx-num = <17 38>;
+		touchpanel,tp_ic_type = <2>;
+	};
+};
+
+&remoteproc_adsp { // Crashes screen
+	firmware-name = "qcom/sm8750/OnePlus/adsp.mbn",
+			"qcom/sm8750/OnePlus/adsp_dtb.mbn";
 
 	status = "okay";
 };
 
 &remoteproc_cdsp {
-	firmware-name = "qcom/sm8750/cdsp.mbn",
-			"qcom/sm8750/cdsp_dtb.mbn";
+	firmware-name = "qcom/sm8750/OnePlus/cdsp.mbn",
+			"qcom/sm8750/OnePlus/cdsp_dtb.mbn";
 
 	status = "okay";
 };
 
 &remoteproc_mpss {
-	firmware-name = "qcom/sm8750/modem.mbn",
-			"qcom/sm8750/modem_dtb.mbn";
+	firmware-name = "qcom/sm8750/OnePlus/modem.mbn",
+			"qcom/sm8750/OnePlus/modem_dtb.mbn";
 
 	status = "okay";
 };
@@ -892,6 +920,43 @@
 &tlmm {
 	/* reserved for secure world */
 	gpio-reserved-ranges = <36 4>, <74 1>;
+
+	ts_reset_active: ts_reset_active-state {
+		pins = "gpio161";
+		function = "gpio";
+		bias-disable;
+		output-low;
+		drive-strength = <8>;
+	};
+
+	ts_int_active: ts_int_active-state {
+		pins = "gpio162";
+		function = "gpio";
+		bias-pull-up;
+		drive-strength = <8>;
+		input-enable;
+	};
+
+	ts_reset_suspend: ts_reset_suspend-state {
+		pins = "gpio161";
+		function = "gpio";
+		bias-pull-down;
+		drive-strength = <2>;
+	};
+
+	ts_int_suspend: ts_int_suspend-state {
+		pins = "gpio162";
+		function = "gpio";
+		bias-pull-down;
+		drive-strength = <2>;
+	};
+	
+	hall_interrupt_input: hall-interrupt-input-state {
+		pins = "gpio97";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
 };
 
 &uart7 {
