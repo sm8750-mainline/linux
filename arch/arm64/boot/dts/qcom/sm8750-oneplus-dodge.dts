@@ -55,7 +55,7 @@
 		compatible = "qcom,sm8750-pmic-glink", "qcom,pmic-glink";
 		#address-cells = <1>;
 		#size-cells = <0>;
-	//	orientation-gpios = <&tlmm 11 GPIO_ACTIVE_HIGH>;
+	//	orientation-gpios = <&tlmm 11 GPIO_ACTIVE_HIGH>; I still need to figure this out for usb dualrole ( i assume )
 	};
 
 	clocks {
@@ -830,7 +830,7 @@
 	};
 };
 
-&pm8550_flash { // Theoretically should work, needs testing tho
+&pm8550_flash {
 	status = "okay";
 	led-0 {
 		function = LED_FUNCTION_FLASH;
