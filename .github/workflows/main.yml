@@ -1,0 +1,50 @@
+name: Build Kernel and DTB
+
+on:
+  push:
+    branches: [ v6.16 ]
+  pull_request:
+    branches: [ v6.16 ]
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clone kernel source
+      uses: actions/checkout@v3
+
+    - name: Set up cross-compiler
+      uses: actions/setup-python@v4
+    - name: Install build dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y bc build-essential flex bison libssl-dev \
+          libncurses5-dev libelf-dev ccache dwarves \
+          gcc-aarch64-linux-gnu clang
+
+    - name: Setup environment vars
+      run: |
+        echo "ARCH=arm64" >> $GITHUB_ENV
+        echo "CROSS_COMPILE=aarch64-linux-gnu-" >> $GITHUB_ENV
+        echo "CC=clang" >> $GITHUB_ENV
+        
+
+    - name: Kernel defconfig
+      run: |
+        make O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang defconfig sm8750.config
+
+    - name: Build Kernel & DTBs
+      run: |
+        make -j$(nproc) O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang Image dtbs
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: kernel-build+dtb
+        path: |
+          out/arch/arm64/boot/Image
+          out/arch/arm64/boot/Image.gz
+          out/arch/arm64/boot/dts/qcom/sm8750-oneplus-dodge.dtb
