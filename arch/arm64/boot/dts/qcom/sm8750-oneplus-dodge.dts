@@ -40,15 +40,6 @@
 		#address-cells = <2>;
 		#size-cells = <2>;
 		ranges;
-
-		framebuffer: framebuffer@fc800000 {
-			compatible = "simple-framebuffer";
-			reg = <0x00 0xfc800000 0x00 0x2b00000>;
-			width = <1440>;
-			height = <3168>;
-			stride = <(1440 * 4)>;
-			format = "a8r8g8b8";
-		};
 	};
 	
 	pmic-glink {
@@ -326,11 +317,6 @@
 			reg = <0x00 0xa4f00000 0x00 0x8000>;
 			label = "dump_device_info_mem";
 		};
-
-		splash_region: memory@fc800000 {
-			no-map;
-			reg = <0x00 0xfc800000 0x00 0x2b00000>;
-		};
 	};
 
 	gpio-keys {
@@ -486,8 +472,8 @@
 
 		vreg_l11b_1p0: ldo11 {
 			regulator-name = "vreg_l11b_1p0";
-			regulator-min-microvolt = <1064000>;
-			regulator-max-microvolt = <1292000>;
+			regulator-min-microvolt = <1000000>;
+			regulator-max-microvolt = <1100000>;
 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 			regulator-allow-set-load;
 			regulator-allowed-modes = <RPMH_REGULATOR_MODE_LPM
@@ -496,7 +482,7 @@
 
 		vreg_l12b_1p8: ldo12 {
 			regulator-name = "vreg_l12b_1p8";
-			regulator-min-microvolt = <1292000>;
+			regulator-min-microvolt = <1800000>;
 			regulator-max-microvolt = <1800000>;
 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
 			regulator-allow-set-load;
@@ -1065,9 +1051,10 @@
 
 
 &mdss {
-	status = "disabled";
+	status = "okay";
 };
 
+// Disabled for now until upstream DP merged
 &mdss_dp0 {
 	status = "disabled";
 };
@@ -1079,21 +1066,21 @@
 &mdss_dsi0 {
 	vdda-supply = <&vreg_l3g_1p2>;
 
-	status = "disabled";
+	status = "okay";
 
 	panel@0 {
-		compatible = "novatek,nt37801";
+		compatible = "oneplus,dodge-panel";
 		reg = <0>;
 
-		reset-gpios = <&tlmm 98 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&disp0_reset_n_active>, <&mdp_vsync_active>;
+		pinctrl-1 = <&disp0_reset_n_suspend>, <&mdp_vsync_suspend>;
 
 		vddio-supply = <&vreg_l12b_1p8>;
 		vci-supply = <&vreg_l13b_3p0>;
 		vdd-supply = <&vreg_l11b_1p0>;
 
-		pinctrl-0 = <&disp0_reset_n_active>, <&mdp_vsync_active>;
-		pinctrl-1 = <&disp0_reset_n_suspend>, <&mdp_vsync_suspend>;
-		pinctrl-names = "default", "sleep";
+		reset-gpios = <&tlmm 98 GPIO_ACTIVE_LOW>;
 
 		port {
 			panel0_in: endpoint {
@@ -1111,5 +1098,5 @@
 &mdss_dsi0_phy {
 	vdds-supply = <&vreg_l3i_0p88>;
 
-	status = "disabled";
+	status = "okay";
 };
