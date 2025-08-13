@@ -1402,4 +1402,16 @@ config TOUCHSCREEN_HIMAX_HX83112B
 	  To compile this driver as a module, choose M here: the
 	  module will be called himax_hx83112b.
 
+config TOUCHSCREEN_SYNA_TCM2
+	tristate "Synaptics TCM touchscreen"
+	depends on I2C
+	select REGMAP_I2C
+	help
+	  Say Y here if you have a Synaptics TCM touchscreen connected
+	  to your system.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here.
+
 endif
