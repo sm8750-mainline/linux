@@ -43,10 +43,17 @@
 	};
 	
 	pmic-glink {
-		compatible = "qcom,sm8750-pmic-glink", "qcom,pmic-glink";
+		compatible = "qcom,sm8750-pmic-glink", "qcom,pmic-glink", "qcom,sc8280xp-pmic-glink";
 		#address-cells = <1>;
 		#size-cells = <0>;
-	//	orientation-gpios = <&tlmm 11 GPIO_ACTIVE_HIGH>; I still need to figure this out for usb dualrole ( i assume )
+		orientation-gpios = <&tlmm 1 GPIO_ACTIVE_HIGH>; // Seems like GPIO 1
+		
+		connector@0 {
+			compatible = "usb-c-connector";
+			reg = <0>;
+			power-role = "dual";
+			data-role = "dual";
+		};
 	};
 
 	clocks {
@@ -866,23 +873,39 @@
 	synaptics_tcm_hbp@0 {
 		compatible = "synaptics,tcm-spi-hbp";
 		reg = <0>;
+		chip-name = "S3910";
 		spi-max-frequency = <19000000>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <162 0x2008>;
 		vdd-supply = <&vreg_l4b_1p8>;
-		synaptics,irq-gpio = <&tlmm 162 0x2008>;
+		synaptics,irq-gpio   = <&tlmm 162 0x2008>;
 		synaptics,reset-gpio = <&tlmm 161 GPIO_ACTIVE_LOW>;
-		synaptics,avdd-gpio = <&pm8550vs_j_gpios 3 GPIO_ACTIVE_LOW>;
+		synaptics,avdd-gpio  = <&pm8550vs_j_gpios 3 GPIO_ACTIVE_LOW>;
 		pinctrl-names = "ts_spi_active", "ts_spi_suspend";
 		pinctrl-0 = <&ts_int_active &ts_reset_active>;
 		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+		panel_type = <10 3 3 3>;
+		firmware_name = "AA545";
 		touchpanel,panel-coords = <20224 44480>;
 		touchpanel,tx-rx-num = <17 38>;
 		touchpanel,tp_ic_type = <2>;
+
+		S3910_PANEL7 {
+			touchpanel,tx-rx-num = <18 40>;
+		};
 	};
 };
 
-&remoteproc_adsp { // Crashes screen
+
+&gpi_dma1 {
+	status = "okay";
+};
+
+&gpi_dma2 {
+	status = "okay";
+};
+
+&remoteproc_adsp {
 	firmware-name = "qcom/sm8750/OnePlus/adsp.mbn",
 			"qcom/sm8750/OnePlus/adsp_dtb.mbn";
 
@@ -1004,8 +1027,10 @@
 	status = "okay";
 };
 
-&usb_1_dwc3 {
-	dr_mode = "peripheral";
+&usb_1_dwc3_ss {
+	remote-endpoint = <&usb_dp_qmpphy_usb_ss_in>;
+	usb-role-switch;
+
 };
 
 &usb_1_hsphy {
