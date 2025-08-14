@@ -90,9 +90,9 @@ static int panel_aa569_p_3_a0019_dsc_on(struct panel_aa569_p_3_a0019_dsc *ctx)
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x88, 0xc0, 0x00);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xff, 0x5a, 0xa5, 0x14);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x82, 0x01);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xff, 0x5a, 0xa5, 0x07);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x91, 0x03);
 	// Changes from downstream kernel
-	//mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xff, 0x5a, 0xa5, 0x07);
-	//mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x91, 0x03);
 	//mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x8a, 0x00);
 	//mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x8b, 0xa0, 0x21);
 	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0x81,
@@ -424,9 +424,9 @@ static int panel_aa569_p_3_a0019_dsc_probe(struct mipi_dsi_device *dsi)
 
 	ctx->dsc.slice_height = 22;
 	ctx->dsc.slice_width = 720;
-	ctx->dsi->dsc_slice_per_pkt = 2;
+	ctx->dsi->dsc_slice_per_pkt = 1;
 	ctx->dsc.slice_count = 2;
-	ctx->dsc.convert_rgb = true; //works true
+	ctx->dsc.convert_rgb = true;
 	ctx->dsc.bits_per_component = 10;
 	ctx->dsc.bits_per_pixel = 8 << 4; /* 4 fractional bits */
 	ctx->dsc.block_pred_enable = true;
