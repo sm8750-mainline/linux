@@ -373,7 +373,7 @@ panel_aa569_p_3_a0019_dsc_create_backlight(struct mipi_dsi_device *dsi)
 	const struct backlight_properties props = {
 		.type = BACKLIGHT_RAW,
 		.brightness = 2047,
-		.max_brightness = 3686, // 10% cut to prevent burn in ( original value 4095 )
+		.max_brightness = 3502, // 15% cut to prevent burn in ( original value 4095 )
 	};
 
 	return devm_backlight_device_register(dev, dev_name(dev), dev, dsi,
