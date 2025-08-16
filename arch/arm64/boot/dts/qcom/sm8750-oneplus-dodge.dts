@@ -890,6 +890,25 @@
 	status = "okay";
 };
 
+&i2c_master_hub_0 {
+	status = "okay";
+};
+
+&i2c_hub_9 {
+	status = "okay";
+	magnachip: magnachip@10 {
+		compatible = "oplus,dhall-ak09970";
+		reg = <0x10>;
+		vcc-supply = <&vreg_l1b_1p8>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <17 2>;
+		threeaxis_hall_support;
+		dhall,irq-gpio = <&tlmm 17 0x2008>;
+		pinctrl-names = "hall_interrupt_input";
+		pinctrl-0 = <&hall_interrupt_input>;
+	};
+};
+
 &spi4 {
 	status = "okay";
 	synaptics_tcm_hbp@0 {
