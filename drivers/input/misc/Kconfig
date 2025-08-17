@@ -968,11 +968,4 @@ config INPUT_STPMIC1_ONKEY
 	  To compile this driver as a module, choose M here: the
 	  module will be called stpmic1_onkey.
 
-config INPUT_TRI_KEY
-	tristate "OnePlus Three-Steps switch"
-	depends on AK09970
-	help
-	  Say Y here to add support for the OnePlus Three-steps switch,
-	  found in OnePlus 13.
-
 endif
