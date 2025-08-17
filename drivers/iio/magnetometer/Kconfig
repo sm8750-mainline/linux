@@ -273,11 +273,4 @@ config YAMAHA_YAS530
 	  To compile this driver as a module, choose M here: the module
 	  will be called yamaha-yas.
 
-config AK09970
-	tristate "AK09970 3-Axis Magnetometer (I2C)"
-	select INPUT_TRI_KEY
-	help
-	  Say Y here to add support for the AK09970 3-Axis Magnetometer,
-	  found in OnePlus 13.
-
 endmenu
