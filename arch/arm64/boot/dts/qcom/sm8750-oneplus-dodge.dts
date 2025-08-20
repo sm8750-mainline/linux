@@ -78,6 +78,11 @@
 		};
 	};
 
+	bat: battery {
+		compatible = "simple-battery";
+		voltage-min-design-microvolt = <6300000>;
+	};
+
 	clocks {
 		xo_board: xo-board {
 			compatible = "fixed-clock";
@@ -368,17 +373,8 @@
 		regulator-boot-on;
 	};
 
-	/*
-	 * MTPs rev 2.0 (power grid v8) come with two different WiFi chips:
-	 * WCN7850 and WCN786x.
-	 * They use the same enable GPIOs and share (almost) the same supplies.
-	 * The WCN7850 supplies are superset of WCN786x variant.
-	 *
-	 * Device nodes here for the PMU, WiFi and Bluetooth describe the MTP
-	 * variant with WCN7850.
-	 */
-	wcn7850-pmu {
-		compatible = "qcom,wcn7850-pmu";
+	wcn7880-pmu { // No compatible drivers
+		compatible = "qcom,wcn7880-pmu";
 
 		pinctrl-names = "default";
 		pinctrl-0 = <&wlan_en>, <&bt_default>;
@@ -1165,7 +1161,7 @@
 	status = "okay";
 
 	bluetooth {
-		compatible = "qcom,wcn7850-bt";
+		compatible = "qcom,wcn7880-bt";
 
 		vddrfacmn-supply = <&vreg_pmu_rfa_cmn>;
 		vddaon-supply = <&vreg_pmu_aon_0p59>;
@@ -1287,4 +1283,13 @@
 	vdds-supply = <&vreg_l3i_0p88>;
 
 	status = "okay";
+};
+
+&i2c_hub_3 {
+    status = "okay";
+    bq28z610: fuel-gauge@55 {
+        compatible = "ti,bq27541";
+        reg = <0x55>;
+        monitored-battery = <&bat>;
+    };
 };
