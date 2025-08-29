@@ -5,7 +5,7 @@
 
 /dts-v1/;
 
-#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/gpio/gpio.h
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
 #include "sm8750.dtsi"
@@ -389,6 +389,8 @@
 		vdddig-supply = <&vreg_s1d_0p97>;
 		vddrfa1p2-supply = <&vreg_s7i_1p2>;
 		vddrfa1p8-supply = <&vreg_s3g_1p8>;
+			
+		status = "disabled";
 
 		clocks = <&rpmhcc RPMH_RF_CLK1>;
 
@@ -1172,6 +1174,7 @@
 		vddrfa1p8-supply = <&vreg_pmu_rfa_1p8>;
 
 		max-speed = <3200000>;
+		status = "disabled";
 	};
 };
 
