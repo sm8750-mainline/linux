@@ -106,9 +106,14 @@ int qcom_snd_sdw_prepare(struct snd_pcm_substream *substream,
 	if (*stream_prepared)
 		return 0;
 
+	dev_info(rtd->card->dev, "sdw_prepare: Calling sdw_prepare_stream\n");
 	ret = sdw_prepare_stream(sruntime);
-	if (ret)
+	if (ret) {
+		dev_err(rtd->card->dev, "sdw_prepare: sdw_prepare_stream failed: %d\n", ret);
 		return ret;
+	}
+
+	dev_info(rtd->card->dev, "sdw_prepare: Calling sdw_enable_stream\n");
 
 	/**
 	 * NOTE: there is a strict hw requirement about the ordering of port
@@ -120,10 +125,13 @@ int qcom_snd_sdw_prepare(struct snd_pcm_substream *substream,
 
 	ret = sdw_enable_stream(sruntime);
 	if (ret) {
+		dev_err(rtd->card->dev, "sdw_prepare: sdw_enable_stream failed: %d\n", ret);
 		sdw_deprepare_stream(sruntime);
 		return ret;
 	}
 	*stream_prepared  = true;
+
+	dev_info(rtd->card->dev, "sdw_prepare: Stream prepared and enabled successfully\n");
 
 	return ret;
 }

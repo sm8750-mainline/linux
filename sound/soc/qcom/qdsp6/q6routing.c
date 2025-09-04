@@ -366,10 +366,11 @@ int q6routing_stream_open(int fedai_id, int perf_mode,
 	struct q6copp *copp;
 	int copp_idx;
 	struct session_data *session, *pdata;
+	struct device *dev = routing_data ? routing_data->dev : NULL;
 
 	if (!routing_data) {
-		pr_err("Routing driver not yet ready\n");
-		return -EINVAL;
+		pr_debug("Routing driver not yet ready\n");
+ 		return -EINVAL;
 	}
 
 	session = &routing_data->sessions[stream_id - 1];
@@ -382,12 +383,15 @@ int q6routing_stream_open(int fedai_id, int perf_mode,
 	pdata = &routing_data->port_data[session->port_id];
 
 	mutex_lock(&routing_data->lock);
+	dev_info(dev, "%s: fedai_id=%d, perf_mode=%d, stream_id=%d, stream_type=%d\n",
+		 __func__, fedai_id, perf_mode, stream_id, stream_type);
 	session->fedai_id = fedai_id;
 
 	session->path_type = pdata->path_type;
 	session->sample_rate = pdata->sample_rate;
 	session->channels = pdata->channels;
 	session->bits_per_sample = pdata->bits_per_sample;
+	dev_info(dev, "%s: opening ADM for port_id=%d\n", __func__, session->port_id);
 
 	payload.num_copps = 0; /* only RX needs to use payload */
 	topology = NULL_COPP_TOPOLOGY;
@@ -397,6 +401,8 @@ int q6routing_stream_open(int fedai_id, int perf_mode,
 			      session->bits_per_sample, 0, 0);
 
 	if (IS_ERR_OR_NULL(copp)) {
+		dev_err(dev, "%s: q6adm_open failed for port %d\n", __func__,
+			session->port_id);
 		mutex_unlock(&routing_data->lock);
 		return -EINVAL;
 	}
@@ -414,6 +420,8 @@ int q6routing_stream_open(int fedai_id, int perf_mode,
 	if (num_copps) {
 		payload.num_copps = num_copps;
 		payload.session_id = stream_id;
+		dev_info(dev, "%s: mapping matrix for session %d to %d copps\n",
+			__func__, stream_id, num_copps);
 		q6adm_matrix_map(routing_data->dev, session->path_type,
 				 payload, perf_mode);
 	}
@@ -477,10 +485,15 @@ static int msm_routing_get_audio_mixer(struct snd_kcontrol *kcontrol,
 	struct msm_routing_data *priv = dev_get_drvdata(c->dev);
 	struct session_data *session = &priv->sessions[session_id];
 
-	if (session->port_id == mc->reg)
-		ucontrol->value.integer.value[0] = 1;
-	else
-		ucontrol->value.integer.value[0] = 0;
+	if (session->port_id == mc->reg) {
+		dev_info(c->dev, "%s: GET: Mixer '%s' value is 1 (port_id=%d)\n",
+			__func__, kcontrol->id.name, session->port_id);
+ 		ucontrol->value.integer.value[0] = 1;
+	} else {
+		dev_info(c->dev, "%s: GET: Mixer '%s' value is 0 (port_id=%d, mc->reg=%u)\n",
+			__func__, kcontrol->id.name, session->port_id, mc->reg);
+ 		ucontrol->value.integer.value[0] = 0;
+	} 
 
 	return 0;
 }
@@ -499,16 +512,24 @@ static int msm_routing_put_audio_mixer(struct snd_kcontrol *kcontrol,
 	int session_id = mc->shift;
 	struct session_data *session = &data->sessions[session_id];
 
+	dev_info(c->dev, "%s: PUT: Mixer '%s' FE_DAI(session)=%d BE_DAI(port)=%u val=%ld\n",
+		__func__, kcontrol->id.name, session_id, mc->reg,
+		ucontrol->value.integer.value[0]);
+
 	if (ucontrol->value.integer.value[0]) {
 		if (session->port_id == be_id)
 			return 0;
 
 		session->port_id = be_id;
+		dev_info(c->dev, "%s: Mixer enabled, setting port_id for session %d to %d\n",
+			__func__, session_id, be_id);
 		snd_soc_dapm_mixer_update_power(dapm, kcontrol, 1, update);
 	} else {
 		if (session->port_id == -1 || session->port_id != be_id)
 			return 0;
 
+		dev_info(c->dev, "%s: Mixer disabled, clearing port_id for session %d\n",
+			__func__, session_id);
 		session->port_id = -1;
 		snd_soc_dapm_mixer_update_power(dapm, kcontrol, 0, update);
 	}
