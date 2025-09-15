@@ -5,7 +5,7 @@
 
 /dts-v1/;
 
-#include <dt-bindings/gpio/gpio.h
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
 #include "sm8750.dtsi"
